@@ -18,8 +18,11 @@ var _ packager.Builder = &BuilderMock{}
 //
 // 		// make and configure a mocked packager.Builder
 // 		mockedBuilder := &BuilderMock{
-// 			BuildFunc: func(language packager.Language, target string) (string, error) {
+// 			BuildFunc: func() (string, error) {
 // 				panic("mock out the Build method")
+// 			},
+// 			CloseFunc: func() error {
+// 				panic("mock out the Close method")
 // 			},
 // 		}
 //
@@ -29,52 +32,72 @@ var _ packager.Builder = &BuilderMock{}
 // 	}
 type BuilderMock struct {
 	// BuildFunc mocks the Build method.
-	BuildFunc func(language packager.Language, target string) (string, error)
+	BuildFunc func() (string, error)
+
+	// CloseFunc mocks the Close method.
+	CloseFunc func() error
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// Build holds details about calls to the Build method.
 		Build []struct {
-			// Language is the language argument value.
-			Language packager.Language
-			// Target is the target argument value.
-			Target string
+		}
+		// Close holds details about calls to the Close method.
+		Close []struct {
 		}
 	}
 	lockBuild sync.RWMutex
+	lockClose sync.RWMutex
 }
 
 // Build calls BuildFunc.
-func (mock *BuilderMock) Build(language packager.Language, target string) (string, error) {
+func (mock *BuilderMock) Build() (string, error) {
 	if mock.BuildFunc == nil {
 		panic("BuilderMock.BuildFunc: method is nil but Builder.Build was just called")
 	}
 	callInfo := struct {
-		Language packager.Language
-		Target   string
-	}{
-		Language: language,
-		Target:   target,
-	}
+	}{}
 	mock.lockBuild.Lock()
 	mock.calls.Build = append(mock.calls.Build, callInfo)
 	mock.lockBuild.Unlock()
-	return mock.BuildFunc(language, target)
+	return mock.BuildFunc()
 }
 
 // BuildCalls gets all the calls that were made to Build.
 // Check the length with:
 //     len(mockedBuilder.BuildCalls())
 func (mock *BuilderMock) BuildCalls() []struct {
-	Language packager.Language
-	Target   string
 } {
 	var calls []struct {
-		Language packager.Language
-		Target   string
 	}
 	mock.lockBuild.RLock()
 	calls = mock.calls.Build
 	mock.lockBuild.RUnlock()
+	return calls
+}
+
+// Close calls CloseFunc.
+func (mock *BuilderMock) Close() error {
+	if mock.CloseFunc == nil {
+		panic("BuilderMock.CloseFunc: method is nil but Builder.Close was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockClose.Lock()
+	mock.calls.Close = append(mock.calls.Close, callInfo)
+	mock.lockClose.Unlock()
+	return mock.CloseFunc()
+}
+
+// CloseCalls gets all the calls that were made to Close.
+// Check the length with:
+//     len(mockedBuilder.CloseCalls())
+func (mock *BuilderMock) CloseCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockClose.RLock()
+	calls = mock.calls.Close
+	mock.lockClose.RUnlock()
 	return calls
 }

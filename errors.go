@@ -2,6 +2,6 @@ package packager
 
 import "errors"
 
-var FileSystemError = errors.New("filesystem error")
-var InvalidPackageError = errors.New("invalid package")
-var ConfigurationError = errors.New("configuration error")
+var ArchiverError = errors.New("archiver error")
+var BuildError = errors.New("build error")
+var ProjectError = errors.New("project error")

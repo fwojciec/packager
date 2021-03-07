@@ -1,4 +1,4 @@
-package packager_test
+package lambda_test
 
 import (
 	"fmt"

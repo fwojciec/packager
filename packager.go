@@ -1,29 +1,48 @@
 package packager
 
-import (
-	"fmt"
-)
-
-// FileSystem abstracts various file system operations.
-type FileSystem interface {
-	ReadDir(target string) ([]string, error)
-	CopyDirToTemp(target string) (string, error)
+// Archiver creates an archive at path with target directory contents.
+type Archiver interface {
+	Archive(target, path string) error
 }
 
-type Validator interface {
-	DirIsValid(language Language, fileList []string) bool
+// Copier copies source to destination.
+type Copier interface {
+	Copy(source, destination string) error
 }
 
-// Builder creates a clean build of a deployment package.
+// Builder builds a package at target for a given language and returns path to
+// the build directory.
 type Builder interface {
-	Build(language Language, target string) (string, error)
+	Build() (string, error)
+	Close() error
 }
 
-// Zipper zips a build directory.
-type Zipper interface {
-	Zip(buildDir string) (string, error)
+// BuilderFactory creates builder instances.
+type BuilderFactory interface {
+	NewBuilder(project Project) (Builder, error)
 }
 
+// Packager creates a deployable package at destination for the source code at target.
+type Packager interface {
+	Package(lang Language, target, destination string) error
+}
+
+// Project represents a source code repository to be packaged.
+type Project interface {
+	// Hash returns a unique hash of project snapshot.
+	Hash() string
+	// Files returns a list of project files.
+	Files() []string
+	// Language returns the project language.
+	Language() Language
+}
+
+// ProjectFactory creates project instances.
+type ProjectFactory interface {
+	NewProject(lang Language, root string) (Project, error)
+}
+
+// Language is a programming language.
 type Language string
 
 const (
@@ -31,30 +50,3 @@ const (
 	LanguageJavaScript Language = "javascript"
 	LanguageTypeScript Language = "typescript"
 )
-
-type Packager struct {
-	Lang    Language
-	Builder Builder
-	Zipper  Zipper
-}
-
-func (p *Packager) Package(target string) (string, error) {
-	buildDir, err := p.Builder.Build(p.Lang, target)
-	if err != nil {
-		return "", err
-	}
-	zipPath, err := p.Zipper.Zip(buildDir)
-	return zipPath, nil
-}
-
-func New(lang string) (*Packager, error) {
-	pkg := &Packager{}
-	switch lang {
-	case "python":
-		pkg.Lang = LanguagePython
-	default:
-		return nil, fmt.Errorf("%w: unrecognized language value: %s", ConfigurationError, lang)
-	}
-
-	return pkg, nil
-}
