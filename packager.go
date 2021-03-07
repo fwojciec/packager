@@ -5,11 +5,6 @@ type Archiver interface {
 	Archive(target, path string) error
 }
 
-// Copier copies source to destination.
-type Copier interface {
-	Copy(source, destination string) error
-}
-
 // Builder builds a package at target for a given language and returns path to
 // the build directory.
 type Builder interface {
@@ -22,6 +17,17 @@ type BuilderFactory interface {
 	NewBuilder(project Project) (Builder, error)
 }
 
+// Copier copies source to destination.
+type Copier interface {
+	Copy(source, destination string) error
+}
+
+// FileSystem abstracts file system operations.
+type FileSystem interface {
+	Dir(root string) ([]string, error)
+	ReadFile(path string) ([]byte, error)
+}
+
 // Packager creates a deployable package at destination for the source code at target.
 type Packager interface {
 	Package(lang Language, target, destination string) error
@@ -30,9 +36,9 @@ type Packager interface {
 // Project represents a source code repository to be packaged.
 type Project interface {
 	// Hash returns a unique hash of project snapshot.
-	Hash() string
+	Hash() (string, error)
 	// Files returns a list of project files.
-	Files() []string
+	Files() ([]string, error)
 	// Language returns the project language.
 	Language() Language
 }

@@ -18,10 +18,10 @@ var _ packager.Project = &ProjectMock{}
 //
 // 		// make and configure a mocked packager.Project
 // 		mockedProject := &ProjectMock{
-// 			FilesFunc: func() []string {
+// 			FilesFunc: func() ([]string, error) {
 // 				panic("mock out the Files method")
 // 			},
-// 			HashFunc: func() string {
+// 			HashFunc: func() (string, error) {
 // 				panic("mock out the Hash method")
 // 			},
 // 			LanguageFunc: func() packager.Language {
@@ -35,10 +35,10 @@ var _ packager.Project = &ProjectMock{}
 // 	}
 type ProjectMock struct {
 	// FilesFunc mocks the Files method.
-	FilesFunc func() []string
+	FilesFunc func() ([]string, error)
 
 	// HashFunc mocks the Hash method.
-	HashFunc func() string
+	HashFunc func() (string, error)
 
 	// LanguageFunc mocks the Language method.
 	LanguageFunc func() packager.Language
@@ -61,7 +61,7 @@ type ProjectMock struct {
 }
 
 // Files calls FilesFunc.
-func (mock *ProjectMock) Files() []string {
+func (mock *ProjectMock) Files() ([]string, error) {
 	if mock.FilesFunc == nil {
 		panic("ProjectMock.FilesFunc: method is nil but Project.Files was just called")
 	}
@@ -87,7 +87,7 @@ func (mock *ProjectMock) FilesCalls() []struct {
 }
 
 // Hash calls HashFunc.
-func (mock *ProjectMock) Hash() string {
+func (mock *ProjectMock) Hash() (string, error) {
 	if mock.HashFunc == nil {
 		panic("ProjectMock.HashFunc: method is nil but Project.Hash was just called")
 	}

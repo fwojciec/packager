@@ -3,6 +3,7 @@ module github.com/fwojciec/packager
 go 1.16
 
 require (
+	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/matryer/is v1.4.0 // indirect
 	github.com/matryer/moq v0.2.1 // indirect
 	github.com/otiai10/copy v1.5.0 // indirect
