@@ -18,8 +18,8 @@ var _ packager.ProjectFactory = &ProjectFactoryMock{}
 //
 // 		// make and configure a mocked packager.ProjectFactory
 // 		mockedProjectFactory := &ProjectFactoryMock{
-// 			NewProjectFunc: func(lang packager.Language, root string) (packager.Project, error) {
-// 				panic("mock out the NewProject method")
+// 			NewFunc: func(root string, lang packager.Language) (packager.Project, error) {
+// 				panic("mock out the New method")
 // 			},
 // 		}
 //
@@ -28,53 +28,53 @@ var _ packager.ProjectFactory = &ProjectFactoryMock{}
 //
 // 	}
 type ProjectFactoryMock struct {
-	// NewProjectFunc mocks the NewProject method.
-	NewProjectFunc func(lang packager.Language, root string) (packager.Project, error)
+	// NewFunc mocks the New method.
+	NewFunc func(root string, lang packager.Language) (packager.Project, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// NewProject holds details about calls to the NewProject method.
-		NewProject []struct {
-			// Lang is the lang argument value.
-			Lang packager.Language
+		// New holds details about calls to the New method.
+		New []struct {
 			// Root is the root argument value.
 			Root string
+			// Lang is the lang argument value.
+			Lang packager.Language
 		}
 	}
-	lockNewProject sync.RWMutex
+	lockNew sync.RWMutex
 }
 
-// NewProject calls NewProjectFunc.
-func (mock *ProjectFactoryMock) NewProject(lang packager.Language, root string) (packager.Project, error) {
-	if mock.NewProjectFunc == nil {
-		panic("ProjectFactoryMock.NewProjectFunc: method is nil but ProjectFactory.NewProject was just called")
+// New calls NewFunc.
+func (mock *ProjectFactoryMock) New(root string, lang packager.Language) (packager.Project, error) {
+	if mock.NewFunc == nil {
+		panic("ProjectFactoryMock.NewFunc: method is nil but ProjectFactory.New was just called")
 	}
 	callInfo := struct {
-		Lang packager.Language
 		Root string
+		Lang packager.Language
 	}{
-		Lang: lang,
 		Root: root,
+		Lang: lang,
 	}
-	mock.lockNewProject.Lock()
-	mock.calls.NewProject = append(mock.calls.NewProject, callInfo)
-	mock.lockNewProject.Unlock()
-	return mock.NewProjectFunc(lang, root)
+	mock.lockNew.Lock()
+	mock.calls.New = append(mock.calls.New, callInfo)
+	mock.lockNew.Unlock()
+	return mock.NewFunc(root, lang)
 }
 
-// NewProjectCalls gets all the calls that were made to NewProject.
+// NewCalls gets all the calls that were made to New.
 // Check the length with:
-//     len(mockedProjectFactory.NewProjectCalls())
-func (mock *ProjectFactoryMock) NewProjectCalls() []struct {
-	Lang packager.Language
+//     len(mockedProjectFactory.NewCalls())
+func (mock *ProjectFactoryMock) NewCalls() []struct {
 	Root string
+	Lang packager.Language
 } {
 	var calls []struct {
-		Lang packager.Language
 		Root string
+		Lang packager.Language
 	}
-	mock.lockNewProject.RLock()
-	calls = mock.calls.NewProject
-	mock.lockNewProject.RUnlock()
+	mock.lockNew.RLock()
+	calls = mock.calls.New
+	mock.lockNew.RUnlock()
 	return calls
 }

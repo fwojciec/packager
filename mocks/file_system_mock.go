@@ -18,11 +18,11 @@ var _ packager.FileSystem = &FileSystemMock{}
 //
 // 		// make and configure a mocked packager.FileSystem
 // 		mockedFileSystem := &FileSystemMock{
-// 			DirFunc: func(root string) ([]string, error) {
-// 				panic("mock out the Dir method")
+// 			ListDirFunc: func(path string) ([]string, error) {
+// 				panic("mock out the ListDir method")
 // 			},
-// 			ReadFileFunc: func(path string) ([]byte, error) {
-// 				panic("mock out the ReadFile method")
+// 			MakeTempDirFunc: func() (string, error) {
+// 				panic("mock out the MakeTempDir method")
 // 			},
 // 		}
 //
@@ -31,87 +31,80 @@ var _ packager.FileSystem = &FileSystemMock{}
 //
 // 	}
 type FileSystemMock struct {
-	// DirFunc mocks the Dir method.
-	DirFunc func(root string) ([]string, error)
+	// ListDirFunc mocks the ListDir method.
+	ListDirFunc func(path string) ([]string, error)
 
-	// ReadFileFunc mocks the ReadFile method.
-	ReadFileFunc func(path string) ([]byte, error)
+	// MakeTempDirFunc mocks the MakeTempDir method.
+	MakeTempDirFunc func() (string, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// Dir holds details about calls to the Dir method.
-		Dir []struct {
-			// Root is the root argument value.
-			Root string
-		}
-		// ReadFile holds details about calls to the ReadFile method.
-		ReadFile []struct {
+		// ListDir holds details about calls to the ListDir method.
+		ListDir []struct {
 			// Path is the path argument value.
 			Path string
 		}
+		// MakeTempDir holds details about calls to the MakeTempDir method.
+		MakeTempDir []struct {
+		}
 	}
-	lockDir      sync.RWMutex
-	lockReadFile sync.RWMutex
+	lockListDir     sync.RWMutex
+	lockMakeTempDir sync.RWMutex
 }
 
-// Dir calls DirFunc.
-func (mock *FileSystemMock) Dir(root string) ([]string, error) {
-	if mock.DirFunc == nil {
-		panic("FileSystemMock.DirFunc: method is nil but FileSystem.Dir was just called")
-	}
-	callInfo := struct {
-		Root string
-	}{
-		Root: root,
-	}
-	mock.lockDir.Lock()
-	mock.calls.Dir = append(mock.calls.Dir, callInfo)
-	mock.lockDir.Unlock()
-	return mock.DirFunc(root)
-}
-
-// DirCalls gets all the calls that were made to Dir.
-// Check the length with:
-//     len(mockedFileSystem.DirCalls())
-func (mock *FileSystemMock) DirCalls() []struct {
-	Root string
-} {
-	var calls []struct {
-		Root string
-	}
-	mock.lockDir.RLock()
-	calls = mock.calls.Dir
-	mock.lockDir.RUnlock()
-	return calls
-}
-
-// ReadFile calls ReadFileFunc.
-func (mock *FileSystemMock) ReadFile(path string) ([]byte, error) {
-	if mock.ReadFileFunc == nil {
-		panic("FileSystemMock.ReadFileFunc: method is nil but FileSystem.ReadFile was just called")
+// ListDir calls ListDirFunc.
+func (mock *FileSystemMock) ListDir(path string) ([]string, error) {
+	if mock.ListDirFunc == nil {
+		panic("FileSystemMock.ListDirFunc: method is nil but FileSystem.ListDir was just called")
 	}
 	callInfo := struct {
 		Path string
 	}{
 		Path: path,
 	}
-	mock.lockReadFile.Lock()
-	mock.calls.ReadFile = append(mock.calls.ReadFile, callInfo)
-	mock.lockReadFile.Unlock()
-	return mock.ReadFileFunc(path)
+	mock.lockListDir.Lock()
+	mock.calls.ListDir = append(mock.calls.ListDir, callInfo)
+	mock.lockListDir.Unlock()
+	return mock.ListDirFunc(path)
 }
 
-// ReadFileCalls gets all the calls that were made to ReadFile.
+// ListDirCalls gets all the calls that were made to ListDir.
 // Check the length with:
-//     len(mockedFileSystem.ReadFileCalls())
-func (mock *FileSystemMock) ReadFileCalls() []struct {
+//     len(mockedFileSystem.ListDirCalls())
+func (mock *FileSystemMock) ListDirCalls() []struct {
 	Path string
 } {
 	var calls []struct {
 		Path string
 	}
-	mock.lockReadFile.RLock()
-	calls = mock.calls.ReadFile
-	mock.lockReadFile.RUnlock()
+	mock.lockListDir.RLock()
+	calls = mock.calls.ListDir
+	mock.lockListDir.RUnlock()
+	return calls
+}
+
+// MakeTempDir calls MakeTempDirFunc.
+func (mock *FileSystemMock) MakeTempDir() (string, error) {
+	if mock.MakeTempDirFunc == nil {
+		panic("FileSystemMock.MakeTempDirFunc: method is nil but FileSystem.MakeTempDir was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockMakeTempDir.Lock()
+	mock.calls.MakeTempDir = append(mock.calls.MakeTempDir, callInfo)
+	mock.lockMakeTempDir.Unlock()
+	return mock.MakeTempDirFunc()
+}
+
+// MakeTempDirCalls gets all the calls that were made to MakeTempDir.
+// Check the length with:
+//     len(mockedFileSystem.MakeTempDirCalls())
+func (mock *FileSystemMock) MakeTempDirCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockMakeTempDir.RLock()
+	calls = mock.calls.MakeTempDir
+	mock.lockMakeTempDir.RUnlock()
 	return calls
 }

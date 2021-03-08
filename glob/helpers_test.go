@@ -1,4 +1,4 @@
-package project_test
+package glob_test
 
 import (
 	"fmt"

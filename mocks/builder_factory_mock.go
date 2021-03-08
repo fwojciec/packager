@@ -18,8 +18,8 @@ var _ packager.BuilderFactory = &BuilderFactoryMock{}
 //
 // 		// make and configure a mocked packager.BuilderFactory
 // 		mockedBuilderFactory := &BuilderFactoryMock{
-// 			NewBuilderFunc: func(project packager.Project) (packager.Builder, error) {
-// 				panic("mock out the NewBuilder method")
+// 			NewFunc: func(lang packager.Language) (packager.Builder, error) {
+// 				panic("mock out the New method")
 // 			},
 // 		}
 //
@@ -28,47 +28,47 @@ var _ packager.BuilderFactory = &BuilderFactoryMock{}
 //
 // 	}
 type BuilderFactoryMock struct {
-	// NewBuilderFunc mocks the NewBuilder method.
-	NewBuilderFunc func(project packager.Project) (packager.Builder, error)
+	// NewFunc mocks the New method.
+	NewFunc func(lang packager.Language) (packager.Builder, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// NewBuilder holds details about calls to the NewBuilder method.
-		NewBuilder []struct {
-			// Project is the project argument value.
-			Project packager.Project
+		// New holds details about calls to the New method.
+		New []struct {
+			// Lang is the lang argument value.
+			Lang packager.Language
 		}
 	}
-	lockNewBuilder sync.RWMutex
+	lockNew sync.RWMutex
 }
 
-// NewBuilder calls NewBuilderFunc.
-func (mock *BuilderFactoryMock) NewBuilder(project packager.Project) (packager.Builder, error) {
-	if mock.NewBuilderFunc == nil {
-		panic("BuilderFactoryMock.NewBuilderFunc: method is nil but BuilderFactory.NewBuilder was just called")
+// New calls NewFunc.
+func (mock *BuilderFactoryMock) New(lang packager.Language) (packager.Builder, error) {
+	if mock.NewFunc == nil {
+		panic("BuilderFactoryMock.NewFunc: method is nil but BuilderFactory.New was just called")
 	}
 	callInfo := struct {
-		Project packager.Project
+		Lang packager.Language
 	}{
-		Project: project,
+		Lang: lang,
 	}
-	mock.lockNewBuilder.Lock()
-	mock.calls.NewBuilder = append(mock.calls.NewBuilder, callInfo)
-	mock.lockNewBuilder.Unlock()
-	return mock.NewBuilderFunc(project)
+	mock.lockNew.Lock()
+	mock.calls.New = append(mock.calls.New, callInfo)
+	mock.lockNew.Unlock()
+	return mock.NewFunc(lang)
 }
 
-// NewBuilderCalls gets all the calls that were made to NewBuilder.
+// NewCalls gets all the calls that were made to New.
 // Check the length with:
-//     len(mockedBuilderFactory.NewBuilderCalls())
-func (mock *BuilderFactoryMock) NewBuilderCalls() []struct {
-	Project packager.Project
+//     len(mockedBuilderFactory.NewCalls())
+func (mock *BuilderFactoryMock) NewCalls() []struct {
+	Lang packager.Language
 } {
 	var calls []struct {
-		Project packager.Project
+		Lang packager.Language
 	}
-	mock.lockNewBuilder.RLock()
-	calls = mock.calls.NewBuilder
-	mock.lockNewBuilder.RUnlock()
+	mock.lockNew.RLock()
+	calls = mock.calls.New
+	mock.lockNew.RUnlock()
 	return calls
 }

@@ -41,9 +41,9 @@ func TestIntegrationPackageAPythonPackageWithNoDependencies(t *testing.T) {
 	t.Cleanup(func() { os.RemoveAll(target) })
 
 	// act
-	subject, err := lambda.NewPackager("python")
+	subject, err := lambda.NewPackager()
 	ok(t, err)
-	err = subject.Package(target, destination)
+	err = subject.Package("python", target, destination)
 	ok(t, err)
 
 	// assert

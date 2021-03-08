@@ -18,14 +18,11 @@ var _ packager.Project = &ProjectMock{}
 //
 // 		// make and configure a mocked packager.Project
 // 		mockedProject := &ProjectMock{
-// 			FilesFunc: func() ([]string, error) {
-// 				panic("mock out the Files method")
+// 			ExcludeFunc: func(path string) bool {
+// 				panic("mock out the Exclude method")
 // 			},
-// 			HashFunc: func() (string, error) {
-// 				panic("mock out the Hash method")
-// 			},
-// 			LanguageFunc: func() packager.Language {
-// 				panic("mock out the Language method")
+// 			RootFunc: func() string {
+// 				panic("mock out the Root method")
 // 			},
 // 		}
 //
@@ -34,106 +31,80 @@ var _ packager.Project = &ProjectMock{}
 //
 // 	}
 type ProjectMock struct {
-	// FilesFunc mocks the Files method.
-	FilesFunc func() ([]string, error)
+	// ExcludeFunc mocks the Exclude method.
+	ExcludeFunc func(path string) bool
 
-	// HashFunc mocks the Hash method.
-	HashFunc func() (string, error)
-
-	// LanguageFunc mocks the Language method.
-	LanguageFunc func() packager.Language
+	// RootFunc mocks the Root method.
+	RootFunc func() string
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// Files holds details about calls to the Files method.
-		Files []struct {
+		// Exclude holds details about calls to the Exclude method.
+		Exclude []struct {
+			// Path is the path argument value.
+			Path string
 		}
-		// Hash holds details about calls to the Hash method.
-		Hash []struct {
-		}
-		// Language holds details about calls to the Language method.
-		Language []struct {
+		// Root holds details about calls to the Root method.
+		Root []struct {
 		}
 	}
-	lockFiles    sync.RWMutex
-	lockHash     sync.RWMutex
-	lockLanguage sync.RWMutex
+	lockExclude sync.RWMutex
+	lockRoot    sync.RWMutex
 }
 
-// Files calls FilesFunc.
-func (mock *ProjectMock) Files() ([]string, error) {
-	if mock.FilesFunc == nil {
-		panic("ProjectMock.FilesFunc: method is nil but Project.Files was just called")
+// Exclude calls ExcludeFunc.
+func (mock *ProjectMock) Exclude(path string) bool {
+	if mock.ExcludeFunc == nil {
+		panic("ProjectMock.ExcludeFunc: method is nil but Project.Exclude was just called")
 	}
 	callInfo := struct {
-	}{}
-	mock.lockFiles.Lock()
-	mock.calls.Files = append(mock.calls.Files, callInfo)
-	mock.lockFiles.Unlock()
-	return mock.FilesFunc()
+		Path string
+	}{
+		Path: path,
+	}
+	mock.lockExclude.Lock()
+	mock.calls.Exclude = append(mock.calls.Exclude, callInfo)
+	mock.lockExclude.Unlock()
+	return mock.ExcludeFunc(path)
 }
 
-// FilesCalls gets all the calls that were made to Files.
+// ExcludeCalls gets all the calls that were made to Exclude.
 // Check the length with:
-//     len(mockedProject.FilesCalls())
-func (mock *ProjectMock) FilesCalls() []struct {
+//     len(mockedProject.ExcludeCalls())
+func (mock *ProjectMock) ExcludeCalls() []struct {
+	Path string
 } {
 	var calls []struct {
+		Path string
 	}
-	mock.lockFiles.RLock()
-	calls = mock.calls.Files
-	mock.lockFiles.RUnlock()
+	mock.lockExclude.RLock()
+	calls = mock.calls.Exclude
+	mock.lockExclude.RUnlock()
 	return calls
 }
 
-// Hash calls HashFunc.
-func (mock *ProjectMock) Hash() (string, error) {
-	if mock.HashFunc == nil {
-		panic("ProjectMock.HashFunc: method is nil but Project.Hash was just called")
+// Root calls RootFunc.
+func (mock *ProjectMock) Root() string {
+	if mock.RootFunc == nil {
+		panic("ProjectMock.RootFunc: method is nil but Project.Root was just called")
 	}
 	callInfo := struct {
 	}{}
-	mock.lockHash.Lock()
-	mock.calls.Hash = append(mock.calls.Hash, callInfo)
-	mock.lockHash.Unlock()
-	return mock.HashFunc()
+	mock.lockRoot.Lock()
+	mock.calls.Root = append(mock.calls.Root, callInfo)
+	mock.lockRoot.Unlock()
+	return mock.RootFunc()
 }
 
-// HashCalls gets all the calls that were made to Hash.
+// RootCalls gets all the calls that were made to Root.
 // Check the length with:
-//     len(mockedProject.HashCalls())
-func (mock *ProjectMock) HashCalls() []struct {
+//     len(mockedProject.RootCalls())
+func (mock *ProjectMock) RootCalls() []struct {
 } {
 	var calls []struct {
 	}
-	mock.lockHash.RLock()
-	calls = mock.calls.Hash
-	mock.lockHash.RUnlock()
-	return calls
-}
-
-// Language calls LanguageFunc.
-func (mock *ProjectMock) Language() packager.Language {
-	if mock.LanguageFunc == nil {
-		panic("ProjectMock.LanguageFunc: method is nil but Project.Language was just called")
-	}
-	callInfo := struct {
-	}{}
-	mock.lockLanguage.Lock()
-	mock.calls.Language = append(mock.calls.Language, callInfo)
-	mock.lockLanguage.Unlock()
-	return mock.LanguageFunc()
-}
-
-// LanguageCalls gets all the calls that were made to Language.
-// Check the length with:
-//     len(mockedProject.LanguageCalls())
-func (mock *ProjectMock) LanguageCalls() []struct {
-} {
-	var calls []struct {
-	}
-	mock.lockLanguage.RLock()
-	calls = mock.calls.Language
-	mock.lockLanguage.RUnlock()
+	mock.lockRoot.RLock()
+	calls = mock.calls.Root
+	mock.lockRoot.RUnlock()
 	return calls
 }

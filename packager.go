@@ -1,51 +1,54 @@
 package packager
 
+const IGNORE_FILE = "./lambdaignore"
+
 // Archiver creates an archive at path with target directory contents.
 type Archiver interface {
-	Archive(target, path string) error
+	Archive(isolatedProject IsolatedProject, path string) error
 }
 
-// Builder builds a package at target for a given language and returns path to
-// the build directory.
+// Builder builds a package at target.
 type Builder interface {
-	Build() (string, error)
-	Close() error
+	Build(isolatedProject IsolatedProject) error
 }
 
 // BuilderFactory creates builder instances.
 type BuilderFactory interface {
-	NewBuilder(project Project) (Builder, error)
+	New(lang Language) (Builder, error)
 }
 
-// Copier copies source to destination.
-type Copier interface {
-	Copy(source, destination string) error
+// FileReader reads file contents as byte slice.
+type FileReader interface {
+	ReadFile(path string) ([]byte, error)
 }
 
 // FileSystem abstracts file system operations.
 type FileSystem interface {
-	Dir(root string) ([]string, error)
-	ReadFile(path string) ([]byte, error)
+	ListDir(path string) ([]string, error)
+	MakeTempDir() (string, error)
 }
 
-// Packager creates a deployable package at destination for the source code at target.
-type Packager interface {
-	Package(lang Language, target, destination string) error
+// Isolator creates a temporary copy of the project to enable safe and clean
+// build.  Close removes the isolated copy.
+type Isolator interface {
+	Isolate(project Project) (IsolatedProject, error)
 }
 
-// Project represents a source code repository to be packaged.
+// IsolatedProject is a temporary copy of a source directory.
+type IsolatedProject interface {
+	Remove() error
+	Root() string
+}
+
+// Project represents a source code repository.
 type Project interface {
-	// Hash returns a unique hash of project snapshot.
-	Hash() (string, error)
-	// Files returns a list of project files.
-	Files() ([]string, error)
-	// Language returns the project language.
-	Language() Language
+	Exclude(path string) bool
+	Root() string
 }
 
 // ProjectFactory creates project instances.
 type ProjectFactory interface {
-	NewProject(lang Language, root string) (Project, error)
+	New(root string, lang Language) (Project, error)
 }
 
 // Language is a programming language.
