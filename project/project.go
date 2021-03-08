@@ -10,26 +10,26 @@ import (
 	"github.com/fwojciec/packager"
 )
 
-const IGNORE_FILE = ".lambdaignore"
-
 type ignoringProject struct {
-	root string
-	lang packager.Language
-	fs   packager.FileSystem
-	ex   *excluder
+	root       string
+	ignoreFile string
+	lang       packager.Language
+	fs         packager.FileSystem
+	ex         *excluder
 }
 
-func New(lang packager.Language, root string, fs packager.FileSystem) (packager.Project, error) {
+func New(lang packager.Language, root, ignoreFile string, fs packager.FileSystem) (packager.Project, error) {
 	ip := &ignoringProject{
-		root: root,
-		lang: lang,
-		fs:   fs,
+		root:       root,
+		ignoreFile: ignoreFile,
+		lang:       lang,
+		fs:         fs,
 	}
 	patterns, err := ip.getIgnorePatterns()
 	if err != nil {
 		return nil, err
 	}
-	patterns = append(patterns, IGNORE_FILE)
+	patterns = append(patterns, ip.ignoreFile)
 	ex, err := newExcluder(lang, patterns...)
 	if err != nil {
 		return nil, err
@@ -66,9 +66,9 @@ func (ip *ignoringProject) Language() packager.Language {
 }
 
 func (ip *ignoringProject) getIgnorePatterns() ([]string, error) {
-	b, err := ip.fs.ReadFile(path.Join(ip.root, IGNORE_FILE))
+	b, err := ip.fs.ReadFile(path.Join(ip.root, ip.ignoreFile))
 	if err != nil {
-		// we don't care, there's no ignore file
+		// we don't care
 		return nil, nil
 	}
 	res := make([]string, 0)
@@ -77,6 +77,7 @@ func (ip *ignoringProject) getIgnorePatterns() ([]string, error) {
 		res = append(res, strings.TrimSpace(scanner.Text()))
 	}
 	if err := scanner.Err(); err != nil {
+		// do we care?
 		return nil, err
 	}
 	return res, nil

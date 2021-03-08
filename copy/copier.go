@@ -21,7 +21,3 @@ func (c *copier) CopyDir(source string, ignorePatterns []string) (string, error)
 	}
 	return destDir, nil
 }
-
-func New() packager.Copier {
-	return &copier{}
-}
