@@ -1,6 +1,6 @@
 // +build integration
 
-package lambda_test
+package client_test
 
 import (
 	"archive/zip"
@@ -11,7 +11,7 @@ import (
 	"path"
 	"testing"
 
-	"github.com/fwojciec/packager/lambda"
+	"github.com/fwojciec/packager/client"
 )
 
 func TestIntegrationPackageAPythonPackageWithNoDependencies(t *testing.T) {
@@ -41,7 +41,7 @@ func TestIntegrationPackageAPythonPackageWithNoDependencies(t *testing.T) {
 	t.Cleanup(func() { os.RemoveAll(target) })
 
 	// act
-	subject, err := lambda.NewPackager()
+	subject := client.New()
 	ok(t, err)
 	err = subject.Package("python", target, destination)
 	ok(t, err)

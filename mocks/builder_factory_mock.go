@@ -18,7 +18,7 @@ var _ packager.BuilderFactory = &BuilderFactoryMock{}
 //
 // 		// make and configure a mocked packager.BuilderFactory
 // 		mockedBuilderFactory := &BuilderFactoryMock{
-// 			NewFunc: func(lang packager.Language) (packager.Builder, error) {
+// 			NewFunc: func(lang packager.Language) packager.Builder {
 // 				panic("mock out the New method")
 // 			},
 // 		}
@@ -29,7 +29,7 @@ var _ packager.BuilderFactory = &BuilderFactoryMock{}
 // 	}
 type BuilderFactoryMock struct {
 	// NewFunc mocks the New method.
-	NewFunc func(lang packager.Language) (packager.Builder, error)
+	NewFunc func(lang packager.Language) packager.Builder
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -43,7 +43,7 @@ type BuilderFactoryMock struct {
 }
 
 // New calls NewFunc.
-func (mock *BuilderFactoryMock) New(lang packager.Language) (packager.Builder, error) {
+func (mock *BuilderFactoryMock) New(lang packager.Language) packager.Builder {
 	if mock.NewFunc == nil {
 		panic("BuilderFactoryMock.NewFunc: method is nil but BuilderFactory.New was just called")
 	}

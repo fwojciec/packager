@@ -9,12 +9,12 @@ type Archiver interface {
 
 // Builder builds a package at target.
 type Builder interface {
-	Build(tempProject LocatorRemover) error
+	Build(project Locator) error
 }
 
 // BuilderFactory creates builder instances.
 type BuilderFactory interface {
-	New(lang Language) (Builder, error)
+	New(lang Language) Builder
 }
 
 // Excluder knows how to exclude paths.

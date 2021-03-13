@@ -26,11 +26,11 @@ func TestClientPackagesPythonProjects(t *testing.T) {
 	}
 
 	mockBuilder := &mocks.BuilderMock{
-		BuildFunc: func(isolatedProject packager.LocatorRemover) error { return nil },
+		BuildFunc: func(project packager.Locator) error { return nil },
 	}
 
 	mockBuilderFactory := &mocks.BuilderFactoryMock{
-		NewFunc: func(lang packager.Language) (packager.Builder, error) { return mockBuilder, nil },
+		NewFunc: func(lang packager.Language) packager.Builder { return mockBuilder },
 	}
 
 	mockArchiver := &mocks.ArchiverMock{
@@ -56,7 +56,7 @@ func TestClientPackagesPythonProjects(t *testing.T) {
 	equals(t, 1, len(mockBuilderFactory.NewCalls()))
 	equals(t, packager.LanguagePython, mockBuilderFactory.NewCalls()[0].Lang)
 	equals(t, 1, len(mockBuilder.BuildCalls()))
-	equals(t, mockTempProject, mockBuilder.BuildCalls()[0].TempProject)
+	equals(t, mockTempProject, mockBuilder.BuildCalls()[0].Project)
 	equals(t, 1, len(mockArchiver.ArchiveCalls()))
 	equals(t, mockTempProject, mockArchiver.ArchiveCalls()[0].TempProject)
 	equals(t, "./out/package.zip", mockArchiver.ArchiveCalls()[0].Path)

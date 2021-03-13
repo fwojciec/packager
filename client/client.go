@@ -4,6 +4,9 @@ import (
 	"fmt"
 
 	"github.com/fwojciec/packager"
+	"github.com/fwojciec/packager/copy"
+	"github.com/fwojciec/packager/glob"
+	"github.com/fwojciec/packager/os"
 )
 
 type Packager struct {
@@ -25,11 +28,7 @@ func (p *Packager) Package(lang packager.Language, target, destination string) e
 	}
 	defer isolatedProject.Remove()
 
-	builder, err := p.BuilderFactory.New(lang)
-	if err != nil {
-		return fmt.Errorf("%w: error initializing builder: %s", packager.BuildError, err)
-	}
-
+	builder := p.BuilderFactory.New(lang)
 	if err := builder.Build(isolatedProject); err != nil {
 		return fmt.Errorf("%w: error building project: %s", packager.BuildError, err)
 	}
@@ -41,7 +40,13 @@ func (p *Packager) Package(lang packager.Language, target, destination string) e
 	return nil
 }
 
-// func New() *Packager {
-// 	fr := os.NewFileReader()
-// 	pf := glob.NewProjectFactory(fr)
-// }
+func New() *Packager {
+	fileReader := os.NewFileReader()
+	projectFactory := glob.NewProjectFactory(fileReader)
+	isolator := copy.NewIsolator()
+
+	return &Packager{
+		ProjectFactory: projectFactory,
+		Isolator:       isolator,
+	}
+}
