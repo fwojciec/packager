@@ -1,6 +1,7 @@
 # packager
 
 `packager` provides a client for packaging local directories as deployment ready AWS Lambda zip packages. It will eventually be wrapped in a Terraform provider, but can be also used as a library.
+🚧 work in progress 🚧
 
 ## Features
 
