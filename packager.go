@@ -4,17 +4,22 @@ const IGNORE_FILE = "./lambdaignore"
 
 // Archiver creates an archive at path with target directory contents.
 type Archiver interface {
-	Archive(isolatedProject IsolatedProject, path string) error
+	Archive(tempProject LocatorRemover, path string) error
 }
 
 // Builder builds a package at target.
 type Builder interface {
-	Build(isolatedProject IsolatedProject) error
+	Build(tempProject LocatorRemover) error
 }
 
 // BuilderFactory creates builder instances.
 type BuilderFactory interface {
 	New(lang Language) (Builder, error)
+}
+
+// Excluder knows how to exclude paths.
+type Excluder interface {
+	Exclude(path string) bool
 }
 
 // FileReader reads file contents as byte slice.
@@ -31,24 +36,34 @@ type FileSystem interface {
 // Isolator creates a temporary copy of the project to enable safe and clean
 // build.  Close removes the isolated copy.
 type Isolator interface {
-	Isolate(project Project) (IsolatedProject, error)
+	Isolate(project LocatorExcluder) (LocatorRemover, error)
 }
 
-// IsolatedProject is a temporary copy of a source directory.
-type IsolatedProject interface {
-	Remove() error
-	Root() string
+// Locator can return it's location.
+type Locator interface {
+	Location() string
 }
 
-// Project represents a source code repository.
-type Project interface {
-	Exclude(path string) bool
-	Root() string
+// LocatorRemover knows it's location and knows how to remove itself.
+type LocatorRemover interface {
+	Locator
+	Remover
+}
+
+// LocatorExcluder knows it's location and knows how to exclude files.
+type LocatorExcluder interface {
+	Locator
+	Excluder
 }
 
 // ProjectFactory creates project instances.
 type ProjectFactory interface {
-	New(root string, lang Language) (Project, error)
+	New(root string) (LocatorExcluder, error)
+}
+
+// Remover knows how to remove itself.
+type Remover interface {
+	Remove() error
 }
 
 // Language is a programming language.

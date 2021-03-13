@@ -7,23 +7,25 @@ import (
 	"github.com/fwojciec/packager/mocks"
 )
 
-func TestPackagerClientPackagesPythonProject(t *testing.T) {
+func TestClientPackagesPythonProjects(t *testing.T) {
 	t.Parallel()
 
+	mockProject := &mocks.LocatorExcluderMock{}
+
 	mockProjectFactory := &mocks.ProjectFactoryMock{
-		NewFunc: func(root string, lang packager.Language) (packager.Project, error) { return nil, nil },
+		NewFunc: func(root string) (packager.LocatorExcluder, error) { return mockProject, nil },
 	}
 
-	mockIsolatedProject := &mocks.IsolatedProjectMock{
+	mockTempProject := &mocks.LocatorRemoverMock{
 		RemoveFunc: func() error { return nil },
 	}
 
 	mockIsolator := &mocks.IsolatorMock{
-		IsolateFunc: func(project packager.Project) (packager.IsolatedProject, error) { return mockIsolatedProject, nil },
+		IsolateFunc: func(project packager.LocatorExcluder) (packager.LocatorRemover, error) { return mockTempProject, nil },
 	}
 
 	mockBuilder := &mocks.BuilderMock{
-		BuildFunc: func(isolatedProject packager.IsolatedProject) error { return nil },
+		BuildFunc: func(isolatedProject packager.LocatorRemover) error { return nil },
 	}
 
 	mockBuilderFactory := &mocks.BuilderFactoryMock{
@@ -31,7 +33,7 @@ func TestPackagerClientPackagesPythonProject(t *testing.T) {
 	}
 
 	mockArchiver := &mocks.ArchiverMock{
-		ArchiveFunc: func(isolatedProject packager.IsolatedProject, path string) error { return nil },
+		ArchiveFunc: func(tempProject packager.LocatorRemover, path string) error { return nil },
 	}
 
 	subject := &packager.Client{
@@ -43,13 +45,19 @@ func TestPackagerClientPackagesPythonProject(t *testing.T) {
 
 	// act
 	err := subject.Package(packager.LanguagePython, "./project_dir", "./out/package.zip")
-	ok(t, err)
 
 	// assert
+	ok(t, err)
 	equals(t, 1, len(mockProjectFactory.NewCalls()))
+	equals(t, "./project_dir", mockProjectFactory.NewCalls()[0].Root)
 	equals(t, 1, len(mockIsolator.IsolateCalls()))
+	equals(t, mockProject, mockIsolator.IsolateCalls()[0].Project)
 	equals(t, 1, len(mockBuilderFactory.NewCalls()))
+	equals(t, packager.LanguagePython, mockBuilderFactory.NewCalls()[0].Lang)
 	equals(t, 1, len(mockBuilder.BuildCalls()))
+	equals(t, mockTempProject, mockBuilder.BuildCalls()[0].TempProject)
 	equals(t, 1, len(mockArchiver.ArchiveCalls()))
-	equals(t, 1, len(mockIsolatedProject.RemoveCalls()))
+	equals(t, mockTempProject, mockArchiver.ArchiveCalls()[0].TempProject)
+	equals(t, "./out/package.zip", mockArchiver.ArchiveCalls()[0].Path)
+	equals(t, 1, len(mockTempProject.RemoveCalls()))
 }

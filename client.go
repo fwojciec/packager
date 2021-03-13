@@ -10,7 +10,7 @@ type Client struct {
 }
 
 func (c *Client) Package(lang Language, target, destination string) error {
-	p, err := c.ProjectFactory.New(target, lang)
+	p, err := c.ProjectFactory.New(target)
 	if err != nil {
 		return fmt.Errorf("%w: error initializing project: %s", ProjectError, err)
 	}

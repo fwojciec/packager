@@ -18,7 +18,7 @@ var _ packager.Builder = &BuilderMock{}
 //
 // 		// make and configure a mocked packager.Builder
 // 		mockedBuilder := &BuilderMock{
-// 			BuildFunc: func(isolatedProject packager.IsolatedProject) error {
+// 			BuildFunc: func(tempProject packager.LocatorRemover) error {
 // 				panic("mock out the Build method")
 // 			},
 // 		}
@@ -29,43 +29,43 @@ var _ packager.Builder = &BuilderMock{}
 // 	}
 type BuilderMock struct {
 	// BuildFunc mocks the Build method.
-	BuildFunc func(isolatedProject packager.IsolatedProject) error
+	BuildFunc func(tempProject packager.LocatorRemover) error
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// Build holds details about calls to the Build method.
 		Build []struct {
-			// IsolatedProject is the isolatedProject argument value.
-			IsolatedProject packager.IsolatedProject
+			// TempProject is the tempProject argument value.
+			TempProject packager.LocatorRemover
 		}
 	}
 	lockBuild sync.RWMutex
 }
 
 // Build calls BuildFunc.
-func (mock *BuilderMock) Build(isolatedProject packager.IsolatedProject) error {
+func (mock *BuilderMock) Build(tempProject packager.LocatorRemover) error {
 	if mock.BuildFunc == nil {
 		panic("BuilderMock.BuildFunc: method is nil but Builder.Build was just called")
 	}
 	callInfo := struct {
-		IsolatedProject packager.IsolatedProject
+		TempProject packager.LocatorRemover
 	}{
-		IsolatedProject: isolatedProject,
+		TempProject: tempProject,
 	}
 	mock.lockBuild.Lock()
 	mock.calls.Build = append(mock.calls.Build, callInfo)
 	mock.lockBuild.Unlock()
-	return mock.BuildFunc(isolatedProject)
+	return mock.BuildFunc(tempProject)
 }
 
 // BuildCalls gets all the calls that were made to Build.
 // Check the length with:
 //     len(mockedBuilder.BuildCalls())
 func (mock *BuilderMock) BuildCalls() []struct {
-	IsolatedProject packager.IsolatedProject
+	TempProject packager.LocatorRemover
 } {
 	var calls []struct {
-		IsolatedProject packager.IsolatedProject
+		TempProject packager.LocatorRemover
 	}
 	mock.lockBuild.RLock()
 	calls = mock.calls.Build

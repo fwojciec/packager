@@ -18,7 +18,7 @@ var _ packager.Isolator = &IsolatorMock{}
 //
 // 		// make and configure a mocked packager.Isolator
 // 		mockedIsolator := &IsolatorMock{
-// 			IsolateFunc: func(project packager.Project) (packager.IsolatedProject, error) {
+// 			IsolateFunc: func(project packager.LocatorExcluder) (packager.LocatorRemover, error) {
 // 				panic("mock out the Isolate method")
 // 			},
 // 		}
@@ -29,26 +29,26 @@ var _ packager.Isolator = &IsolatorMock{}
 // 	}
 type IsolatorMock struct {
 	// IsolateFunc mocks the Isolate method.
-	IsolateFunc func(project packager.Project) (packager.IsolatedProject, error)
+	IsolateFunc func(project packager.LocatorExcluder) (packager.LocatorRemover, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// Isolate holds details about calls to the Isolate method.
 		Isolate []struct {
 			// Project is the project argument value.
-			Project packager.Project
+			Project packager.LocatorExcluder
 		}
 	}
 	lockIsolate sync.RWMutex
 }
 
 // Isolate calls IsolateFunc.
-func (mock *IsolatorMock) Isolate(project packager.Project) (packager.IsolatedProject, error) {
+func (mock *IsolatorMock) Isolate(project packager.LocatorExcluder) (packager.LocatorRemover, error) {
 	if mock.IsolateFunc == nil {
 		panic("IsolatorMock.IsolateFunc: method is nil but Isolator.Isolate was just called")
 	}
 	callInfo := struct {
-		Project packager.Project
+		Project packager.LocatorExcluder
 	}{
 		Project: project,
 	}
@@ -62,10 +62,10 @@ func (mock *IsolatorMock) Isolate(project packager.Project) (packager.IsolatedPr
 // Check the length with:
 //     len(mockedIsolator.IsolateCalls())
 func (mock *IsolatorMock) IsolateCalls() []struct {
-	Project packager.Project
+	Project packager.LocatorExcluder
 } {
 	var calls []struct {
-		Project packager.Project
+		Project packager.LocatorExcluder
 	}
 	mock.lockIsolate.RLock()
 	calls = mock.calls.Isolate

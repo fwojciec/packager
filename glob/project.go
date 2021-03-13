@@ -16,7 +16,7 @@ type project struct {
 	root  string
 }
 
-func NewProject(root string, fr packager.FileReader) (packager.Project, error) {
+func NewProject(root string, fr packager.FileReader) (packager.LocatorExcluder, error) {
 	p := &project{
 		fr:    fr,
 		globs: make(map[string]glob.Glob),
@@ -46,7 +46,7 @@ func (p *project) Exclude(path string) bool {
 	return false
 }
 
-func (p *project) Root() string {
+func (p *project) Location() string {
 	return p.root
 }
 
@@ -63,7 +63,7 @@ func (p *project) addGlob(pattern string) error {
 }
 
 func (p *project) readIgnoreFile() ([]string, error) {
-	b, err := p.fr.ReadFile(path.Join(p.Root(), packager.IGNORE_FILE))
+	b, err := p.fr.ReadFile(path.Join(p.root, packager.IGNORE_FILE))
 	if err != nil {
 		// ignore error, since ignoreFile is not required
 		return nil, nil

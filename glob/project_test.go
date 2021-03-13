@@ -8,7 +8,7 @@ import (
 	"github.com/fwojciec/packager/mocks"
 )
 
-func TestProjectReturnsItsRoot(t *testing.T) {
+func TestProjectReturnsItsLocation(t *testing.T) {
 	t.Parallel()
 	mockFileReader := &mocks.FileReaderMock{
 		ReadFileFunc: func(path string) ([]byte, error) { return nil, nil },
@@ -16,7 +16,7 @@ func TestProjectReturnsItsRoot(t *testing.T) {
 	subject, err := glob.NewProject("./root", mockFileReader)
 	ok(t, err)
 
-	result := subject.Root()
+	result := subject.Location()
 
 	equals(t, "./root", result)
 }

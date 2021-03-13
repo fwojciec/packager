@@ -18,7 +18,7 @@ var _ packager.Archiver = &ArchiverMock{}
 //
 // 		// make and configure a mocked packager.Archiver
 // 		mockedArchiver := &ArchiverMock{
-// 			ArchiveFunc: func(isolatedProject packager.IsolatedProject, path string) error {
+// 			ArchiveFunc: func(tempProject packager.LocatorRemover, path string) error {
 // 				panic("mock out the Archive method")
 // 			},
 // 		}
@@ -29,14 +29,14 @@ var _ packager.Archiver = &ArchiverMock{}
 // 	}
 type ArchiverMock struct {
 	// ArchiveFunc mocks the Archive method.
-	ArchiveFunc func(isolatedProject packager.IsolatedProject, path string) error
+	ArchiveFunc func(tempProject packager.LocatorRemover, path string) error
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// Archive holds details about calls to the Archive method.
 		Archive []struct {
-			// IsolatedProject is the isolatedProject argument value.
-			IsolatedProject packager.IsolatedProject
+			// TempProject is the tempProject argument value.
+			TempProject packager.LocatorRemover
 			// Path is the path argument value.
 			Path string
 		}
@@ -45,33 +45,33 @@ type ArchiverMock struct {
 }
 
 // Archive calls ArchiveFunc.
-func (mock *ArchiverMock) Archive(isolatedProject packager.IsolatedProject, path string) error {
+func (mock *ArchiverMock) Archive(tempProject packager.LocatorRemover, path string) error {
 	if mock.ArchiveFunc == nil {
 		panic("ArchiverMock.ArchiveFunc: method is nil but Archiver.Archive was just called")
 	}
 	callInfo := struct {
-		IsolatedProject packager.IsolatedProject
-		Path            string
+		TempProject packager.LocatorRemover
+		Path        string
 	}{
-		IsolatedProject: isolatedProject,
-		Path:            path,
+		TempProject: tempProject,
+		Path:        path,
 	}
 	mock.lockArchive.Lock()
 	mock.calls.Archive = append(mock.calls.Archive, callInfo)
 	mock.lockArchive.Unlock()
-	return mock.ArchiveFunc(isolatedProject, path)
+	return mock.ArchiveFunc(tempProject, path)
 }
 
 // ArchiveCalls gets all the calls that were made to Archive.
 // Check the length with:
 //     len(mockedArchiver.ArchiveCalls())
 func (mock *ArchiverMock) ArchiveCalls() []struct {
-	IsolatedProject packager.IsolatedProject
-	Path            string
+	TempProject packager.LocatorRemover
+	Path        string
 } {
 	var calls []struct {
-		IsolatedProject packager.IsolatedProject
-		Path            string
+		TempProject packager.LocatorRemover
+		Path        string
 	}
 	mock.lockArchive.RLock()
 	calls = mock.calls.Archive
