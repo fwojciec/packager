@@ -1,6 +1,7 @@
 package glob_test
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/fwojciec/packager"
@@ -8,7 +9,7 @@ import (
 	"github.com/fwojciec/packager/mocks"
 )
 
-func TestProjectReturnsItsLocation(t *testing.T) {
+func TestProjectReturnsItsAbsoluteLocation(t *testing.T) {
 	t.Parallel()
 	mockFileReader := &mocks.FileReaderMock{
 		ReadFileFunc: func(path string) ([]byte, error) { return nil, nil },
@@ -18,7 +19,8 @@ func TestProjectReturnsItsLocation(t *testing.T) {
 
 	result := subject.Location()
 
-	equals(t, "./root", result)
+	expected, _ := filepath.Abs("./root")
+	equals(t, expected, result)
 }
 
 func TestProjectDoesntExcludeProjectFiles(t *testing.T) {

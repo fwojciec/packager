@@ -27,12 +27,6 @@ type FileReader interface {
 	ReadFile(path string) ([]byte, error)
 }
 
-// FileSystem abstracts file system operations.
-type FileSystem interface {
-	ListDir(path string) ([]string, error)
-	MakeTempDir() (string, error)
-}
-
 // Isolator creates a temporary copy of the project to enable safe and clean
 // build.  Close removes the isolated copy.
 type Isolator interface {

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/fwojciec/packager"
@@ -17,10 +18,14 @@ type project struct {
 }
 
 func NewProject(root string, fr packager.FileReader) (packager.LocatorExcluder, error) {
+	absRoot, err := filepath.Abs(root)
+	if err != nil {
+		return nil, nil
+	}
 	p := &project{
 		fr:    fr,
+		root:  absRoot,
 		globs: make(map[string]glob.Glob),
-		root:  root,
 	}
 	if err := p.addGlob(packager.IGNORE_FILE); err != nil {
 		return nil, err

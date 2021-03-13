@@ -1,9 +1,10 @@
-package packager_test
+package client_test
 
 import (
 	"testing"
 
 	"github.com/fwojciec/packager"
+	"github.com/fwojciec/packager/client"
 	"github.com/fwojciec/packager/mocks"
 )
 
@@ -36,7 +37,7 @@ func TestClientPackagesPythonProjects(t *testing.T) {
 		ArchiveFunc: func(tempProject packager.LocatorRemover, path string) error { return nil },
 	}
 
-	subject := &packager.Client{
+	subject := &client.Packager{
 		ProjectFactory: mockProjectFactory,
 		BuilderFactory: mockBuilderFactory,
 		Isolator:       mockIsolator,
