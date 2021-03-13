@@ -25,9 +25,9 @@ func TestZipArchiver(t *testing.T) {
 	t.Parallel()
 
 	testFiles := []testFile{
-		{"main.py", []byte("main.py contents\n")},
-		{"submodule/__init__.py", []byte{}},
-		{"submodule/submodule.py", []byte("submodule.py contents\n")},
+		{filepath.Clean("main.py"), []byte("main.py contents\n")},
+		{filepath.Clean("submodule/__init__.py"), []byte{}},
+		{filepath.Clean("submodule/submodule.py"), []byte("submodule.py contents\n")},
 	}
 	srcDir := createFilesInTemporaryDirectory(t, testFiles)
 	t.Cleanup(func() { os.RemoveAll(srcDir) })
