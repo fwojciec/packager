@@ -1,10 +1,12 @@
 package packager
 
+import "io"
+
 const IGNORE_FILE = "./lambdaignore"
 
 // Archiver creates an archive at path with target directory contents.
 type Archiver interface {
-	Archive(tempProject LocatorRemover, path string) error
+	Archive(project Locator, dest string) error
 }
 
 // Builder builds a package at target.
@@ -17,9 +19,19 @@ type BuilderFactory interface {
 	New(lang Language) Builder
 }
 
+// DirLister returns a list of all files in a directory.
+type DirLister interface {
+	ListDir(target string) ([]string, error)
+}
+
 // Excluder knows how to exclude paths.
 type Excluder interface {
 	Exclude(path string) bool
+}
+
+// FileCopier writes a file at srcPath to dest.
+type FileCopier interface {
+	Copy(srcPath string, dest io.Writer) error
 }
 
 // FileReader reads file contents as byte slice.

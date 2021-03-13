@@ -18,7 +18,7 @@ var _ packager.Archiver = &ArchiverMock{}
 //
 // 		// make and configure a mocked packager.Archiver
 // 		mockedArchiver := &ArchiverMock{
-// 			ArchiveFunc: func(tempProject packager.LocatorRemover, path string) error {
+// 			ArchiveFunc: func(project packager.Locator, dest string) error {
 // 				panic("mock out the Archive method")
 // 			},
 // 		}
@@ -29,49 +29,49 @@ var _ packager.Archiver = &ArchiverMock{}
 // 	}
 type ArchiverMock struct {
 	// ArchiveFunc mocks the Archive method.
-	ArchiveFunc func(tempProject packager.LocatorRemover, path string) error
+	ArchiveFunc func(project packager.Locator, dest string) error
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// Archive holds details about calls to the Archive method.
 		Archive []struct {
-			// TempProject is the tempProject argument value.
-			TempProject packager.LocatorRemover
-			// Path is the path argument value.
-			Path string
+			// Project is the project argument value.
+			Project packager.Locator
+			// Dest is the dest argument value.
+			Dest string
 		}
 	}
 	lockArchive sync.RWMutex
 }
 
 // Archive calls ArchiveFunc.
-func (mock *ArchiverMock) Archive(tempProject packager.LocatorRemover, path string) error {
+func (mock *ArchiverMock) Archive(project packager.Locator, dest string) error {
 	if mock.ArchiveFunc == nil {
 		panic("ArchiverMock.ArchiveFunc: method is nil but Archiver.Archive was just called")
 	}
 	callInfo := struct {
-		TempProject packager.LocatorRemover
-		Path        string
+		Project packager.Locator
+		Dest    string
 	}{
-		TempProject: tempProject,
-		Path:        path,
+		Project: project,
+		Dest:    dest,
 	}
 	mock.lockArchive.Lock()
 	mock.calls.Archive = append(mock.calls.Archive, callInfo)
 	mock.lockArchive.Unlock()
-	return mock.ArchiveFunc(tempProject, path)
+	return mock.ArchiveFunc(project, dest)
 }
 
 // ArchiveCalls gets all the calls that were made to Archive.
 // Check the length with:
 //     len(mockedArchiver.ArchiveCalls())
 func (mock *ArchiverMock) ArchiveCalls() []struct {
-	TempProject packager.LocatorRemover
-	Path        string
+	Project packager.Locator
+	Dest    string
 } {
 	var calls []struct {
-		TempProject packager.LocatorRemover
-		Path        string
+		Project packager.Locator
+		Dest    string
 	}
 	mock.lockArchive.RLock()
 	calls = mock.calls.Archive

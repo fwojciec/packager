@@ -4,9 +4,11 @@ import (
 	"fmt"
 
 	"github.com/fwojciec/packager"
+	"github.com/fwojciec/packager/builder"
 	"github.com/fwojciec/packager/copy"
+	"github.com/fwojciec/packager/fs"
 	"github.com/fwojciec/packager/glob"
-	"github.com/fwojciec/packager/os"
+	"github.com/fwojciec/packager/zip"
 )
 
 type Packager struct {
@@ -41,12 +43,15 @@ func (p *Packager) Package(lang packager.Language, target, destination string) e
 }
 
 func New() *Packager {
-	fileReader := os.NewFileReader()
-	projectFactory := glob.NewProjectFactory(fileReader)
+	projectFactory := glob.NewProjectFactory(fs.NewFileReader())
 	isolator := copy.NewIsolator()
+	builderFactory := builder.NewBuilderFactory()
+	archiver := zip.New(fs.NewDirLister())
 
 	return &Packager{
 		ProjectFactory: projectFactory,
 		Isolator:       isolator,
+		BuilderFactory: builderFactory,
+		Archiver:       archiver,
 	}
 }

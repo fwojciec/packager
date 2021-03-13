@@ -34,7 +34,7 @@ func TestClientPackagesPythonProjects(t *testing.T) {
 	}
 
 	mockArchiver := &mocks.ArchiverMock{
-		ArchiveFunc: func(tempProject packager.LocatorRemover, path string) error { return nil },
+		ArchiveFunc: func(project packager.Locator, dest string) error { return nil },
 	}
 
 	subject := &client.Packager{
@@ -58,7 +58,7 @@ func TestClientPackagesPythonProjects(t *testing.T) {
 	equals(t, 1, len(mockBuilder.BuildCalls()))
 	equals(t, mockTempProject, mockBuilder.BuildCalls()[0].Project)
 	equals(t, 1, len(mockArchiver.ArchiveCalls()))
-	equals(t, mockTempProject, mockArchiver.ArchiveCalls()[0].TempProject)
-	equals(t, "./out/package.zip", mockArchiver.ArchiveCalls()[0].Path)
+	equals(t, mockTempProject, mockArchiver.ArchiveCalls()[0].Project)
+	equals(t, "./out/package.zip", mockArchiver.ArchiveCalls()[0].Dest)
 	equals(t, 1, len(mockTempProject.RemoveCalls()))
 }
