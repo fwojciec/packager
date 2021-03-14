@@ -18,7 +18,7 @@ var _ packager.LocatorExcluder = &LocatorExcluderMock{}
 //
 // 		// make and configure a mocked packager.LocatorExcluder
 // 		mockedLocatorExcluder := &LocatorExcluderMock{
-// 			ExcludeFunc: func(path string) bool {
+// 			ExcludeFunc: func(path string) (bool, error) {
 // 				panic("mock out the Exclude method")
 // 			},
 // 			LocationFunc: func() string {
@@ -32,7 +32,7 @@ var _ packager.LocatorExcluder = &LocatorExcluderMock{}
 // 	}
 type LocatorExcluderMock struct {
 	// ExcludeFunc mocks the Exclude method.
-	ExcludeFunc func(path string) bool
+	ExcludeFunc func(path string) (bool, error)
 
 	// LocationFunc mocks the Location method.
 	LocationFunc func() string
@@ -53,7 +53,7 @@ type LocatorExcluderMock struct {
 }
 
 // Exclude calls ExcludeFunc.
-func (mock *LocatorExcluderMock) Exclude(path string) bool {
+func (mock *LocatorExcluderMock) Exclude(path string) (bool, error) {
 	if mock.ExcludeFunc == nil {
 		panic("LocatorExcluderMock.ExcludeFunc: method is nil but LocatorExcluder.Exclude was just called")
 	}

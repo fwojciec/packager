@@ -15,16 +15,13 @@ type project struct {
 	fr    packager.FileReader
 	globs map[string]glob.Glob
 	root  string
+	lang  packager.Language
 }
 
-func NewProject(root string, fr packager.FileReader) (packager.LocatorExcluder, error) {
-	absRoot, err := filepath.Abs(root)
-	if err != nil {
-		return nil, nil
-	}
+func NewProject(root string, lang packager.Language, fr packager.FileReader) (packager.LocatorExcluder, error) {
 	p := &project{
 		fr:    fr,
-		root:  absRoot,
+		root:  filepath.Clean(root),
 		globs: make(map[string]glob.Glob),
 	}
 	if err := p.addGlob(packager.IGNORE_FILE); err != nil {
@@ -42,13 +39,17 @@ func NewProject(root string, fr packager.FileReader) (packager.LocatorExcluder, 
 	return p, nil
 }
 
-func (p *project) Exclude(path string) bool {
+func (p *project) Exclude(path string) (bool, error) {
 	for _, g := range p.globs {
-		if g.Match(path) {
-			return true
+		relPath, err := filepath.Rel(p.root, path)
+		if err != nil {
+			return false, err
+		}
+		if g.Match(relPath) {
+			return true, nil
 		}
 	}
-	return false
+	return false, nil
 }
 
 func (p *project) Location() string {

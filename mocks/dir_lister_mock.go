@@ -18,7 +18,7 @@ var _ packager.DirLister = &DirListerMock{}
 //
 // 		// make and configure a mocked packager.DirLister
 // 		mockedDirLister := &DirListerMock{
-// 			ListDirFunc: func(target string) ([]string, error) {
+// 			ListDirFunc: func(target string, exclFn func(path string) (bool, error)) ([]string, error) {
 // 				panic("mock out the ListDir method")
 // 			},
 // 		}
@@ -29,7 +29,7 @@ var _ packager.DirLister = &DirListerMock{}
 // 	}
 type DirListerMock struct {
 	// ListDirFunc mocks the ListDir method.
-	ListDirFunc func(target string) ([]string, error)
+	ListDirFunc func(target string, exclFn func(path string) (bool, error)) ([]string, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -37,25 +37,29 @@ type DirListerMock struct {
 		ListDir []struct {
 			// Target is the target argument value.
 			Target string
+			// ExclFn is the exclFn argument value.
+			ExclFn func(path string) (bool, error)
 		}
 	}
 	lockListDir sync.RWMutex
 }
 
 // ListDir calls ListDirFunc.
-func (mock *DirListerMock) ListDir(target string) ([]string, error) {
+func (mock *DirListerMock) ListDir(target string, exclFn func(path string) (bool, error)) ([]string, error) {
 	if mock.ListDirFunc == nil {
 		panic("DirListerMock.ListDirFunc: method is nil but DirLister.ListDir was just called")
 	}
 	callInfo := struct {
 		Target string
+		ExclFn func(path string) (bool, error)
 	}{
 		Target: target,
+		ExclFn: exclFn,
 	}
 	mock.lockListDir.Lock()
 	mock.calls.ListDir = append(mock.calls.ListDir, callInfo)
 	mock.lockListDir.Unlock()
-	return mock.ListDirFunc(target)
+	return mock.ListDirFunc(target, exclFn)
 }
 
 // ListDirCalls gets all the calls that were made to ListDir.
@@ -63,9 +67,11 @@ func (mock *DirListerMock) ListDir(target string) ([]string, error) {
 //     len(mockedDirLister.ListDirCalls())
 func (mock *DirListerMock) ListDirCalls() []struct {
 	Target string
+	ExclFn func(path string) (bool, error)
 } {
 	var calls []struct {
 		Target string
+		ExclFn func(path string) (bool, error)
 	}
 	mock.lockListDir.RLock()
 	calls = mock.calls.ListDir

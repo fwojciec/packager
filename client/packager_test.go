@@ -14,7 +14,7 @@ func TestClientPackagesPythonProjects(t *testing.T) {
 	mockProject := &mocks.LocatorExcluderMock{}
 
 	mockProjectFactory := &mocks.ProjectFactoryMock{
-		NewFunc: func(root string) (packager.LocatorExcluder, error) { return mockProject, nil },
+		NewFunc: func(root string, lang packager.Language) (packager.LocatorExcluder, error) { return mockProject, nil },
 	}
 
 	mockTempProject := &mocks.LocatorRemoverMock{
@@ -51,6 +51,7 @@ func TestClientPackagesPythonProjects(t *testing.T) {
 	ok(t, err)
 	equals(t, 1, len(mockProjectFactory.NewCalls()))
 	equals(t, "./project_dir", mockProjectFactory.NewCalls()[0].Root)
+	equals(t, packager.LanguagePython, mockProjectFactory.NewCalls()[0].Lang)
 	equals(t, 1, len(mockIsolator.IsolateCalls()))
 	equals(t, mockProject, mockIsolator.IsolateCalls()[0].Project)
 	equals(t, 1, len(mockBuilderFactory.NewCalls()))
@@ -61,4 +62,28 @@ func TestClientPackagesPythonProjects(t *testing.T) {
 	equals(t, mockTempProject, mockArchiver.ArchiveCalls()[0].Project)
 	equals(t, "./out/package.zip", mockArchiver.ArchiveCalls()[0].Dest)
 	equals(t, 1, len(mockTempProject.RemoveCalls()))
+}
+
+func TestClientHashesAPythonProject(t *testing.T) {
+	t.Parallel()
+
+	mockProject := &mocks.LocatorExcluderMock{}
+	mockProjectFactory := &mocks.ProjectFactoryMock{
+		NewFunc: func(root string, lang packager.Language) (packager.LocatorExcluder, error) { return mockProject, nil },
+	}
+	mockHasher := &mocks.HasherMock{
+		HashFunc: func(project packager.LocatorExcluder) (string, error) { return "", nil },
+	}
+	subject := &client.Packager{
+		ProjectFactory: mockProjectFactory,
+		Hasher:         mockHasher,
+	}
+
+	_, err := subject.Hash(packager.LanguagePython, "./project_dir")
+	ok(t, err)
+
+	equals(t, 1, len(mockProjectFactory.NewCalls()))
+	equals(t, "./project_dir", mockProjectFactory.NewCalls()[0].Root)
+	equals(t, 1, len(mockHasher.HashCalls()))
+	equals(t, mockProject, mockHasher.HashCalls()[0].Project)
 }

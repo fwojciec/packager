@@ -2,11 +2,40 @@ package client_test
 
 import (
 	"fmt"
+	"os"
+	"path"
 	"path/filepath"
 	"reflect"
 	"runtime"
 	"testing"
 )
+
+type testFile struct {
+	name     string
+	contents []byte
+}
+
+func createFilesInTemporaryDirectory(t *testing.T, testFiles []testFile) string {
+	t.Helper()
+
+	tDir, err := os.MkdirTemp("", "")
+	ok(t, err)
+
+	for _, tf := range testFiles {
+		dir, file := filepath.Split(tf.name)
+		if dir != "" {
+			err := os.MkdirAll(path.Join(tDir, dir), os.ModePerm)
+			ok(t, err)
+		}
+		f, err := os.Create(path.Join(tDir, dir, file))
+		ok(t, err)
+		defer f.Close()
+		_, err = f.Write(tf.contents)
+		ok(t, err)
+	}
+
+	return tDir
+}
 
 // assert fails the test if the condition is false.
 func assert(tb testing.TB, condition bool, msg string, v ...interface{}) {

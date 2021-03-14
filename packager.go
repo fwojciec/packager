@@ -1,6 +1,6 @@
 package packager
 
-const IGNORE_FILE = "./lambdaignore"
+const IGNORE_FILE = ".lambdaignore"
 
 // Archiver creates an archive at path with target directory contents.
 type Archiver interface {
@@ -19,17 +19,22 @@ type BuilderFactory interface {
 
 // DirLister returns a list of all files in a directory.
 type DirLister interface {
-	ListDir(target string) ([]string, error)
+	ListDir(target string, exclFn func(path string) (bool, error)) ([]string, error)
 }
 
 // Excluder knows how to exclude paths.
 type Excluder interface {
-	Exclude(path string) bool
+	Exclude(path string) (bool, error)
 }
 
 // FileReader reads file contents as byte slice.
 type FileReader interface {
 	ReadFile(path string) ([]byte, error)
+}
+
+// Hasher hashes a project.
+type Hasher interface {
+	Hash(project LocatorExcluder) (string, error)
 }
 
 // Isolator creates a temporary copy of the project to enable safe and clean
@@ -57,7 +62,7 @@ type LocatorExcluder interface {
 
 // ProjectFactory creates project instances.
 type ProjectFactory interface {
-	New(root string) (LocatorExcluder, error)
+	New(root string, lang Language) (LocatorExcluder, error)
 }
 
 // Remover knows how to remove itself.

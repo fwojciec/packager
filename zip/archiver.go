@@ -16,7 +16,8 @@ type archiver struct {
 func (a *archiver) Archive(project packager.Locator, dest string) error {
 	src := project.Location()
 
-	projFiles, err := a.dl.ListDir(src)
+	noopExclFn := func(path string) (bool, error) { return false, nil }
+	projFiles, err := a.dl.ListDir(src, noopExclFn)
 	if err != nil {
 		return err
 	}
