@@ -2,11 +2,35 @@ package copy_test
 
 import (
 	"fmt"
+	"os"
+	"path"
 	"path/filepath"
 	"reflect"
 	"runtime"
 	"testing"
 )
+
+func createFilesInTemporaryDirectory(t *testing.T, config map[string][]byte) string {
+	t.Helper()
+
+	tDir, err := os.MkdirTemp("", "")
+	ok(t, err)
+
+	for p, c := range config {
+		dir, file := filepath.Split(p)
+		if dir != "" {
+			err := os.MkdirAll(path.Join(tDir, dir), os.ModePerm)
+			ok(t, err)
+		}
+		f, err := os.Create(path.Join(tDir, dir, file))
+		ok(t, err)
+		defer f.Close()
+		_, err = f.Write(c)
+		ok(t, err)
+	}
+
+	return tDir
+}
 
 // assert fails the test if the condition is false.
 func assert(tb testing.TB, condition bool, msg string, v ...interface{}) {

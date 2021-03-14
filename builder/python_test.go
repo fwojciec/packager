@@ -5,8 +5,6 @@ package builder_test
 import (
 	"fmt"
 	"os"
-	"path"
-	"path/filepath"
 	"testing"
 
 	"github.com/fwojciec/packager"
@@ -70,33 +68,4 @@ func TestPythonBuilderWithRequirementsFile(t *testing.T) {
 		equals(t, expected[i].fileName, item.Name())
 		assert(t, expected[i].isDir == item.IsDir(), fmt.Sprintf("value of IsDir for %q should be %v", item.Name(), expected[i].isDir))
 	}
-}
-
-func createFilesInTemporaryDirectory(t *testing.T, config map[string][]byte) string {
-	tDir, err := os.MkdirTemp("", "")
-	if err != nil {
-		t.Fatal("failed to create temporary directory:", err)
-	}
-
-	for p, c := range config {
-		dir, file := filepath.Split(p)
-		if dir != "" {
-			if err := os.MkdirAll(path.Join(tDir, dir), os.ModePerm); err != nil {
-				t.Fatal("failed to create directory:", err)
-			}
-		}
-		f, err := os.Create(path.Join(tDir, dir, file))
-		if err != nil {
-			t.Fatal("failed to create test file:", err)
-		}
-		_, err = f.Write(c)
-		if err != nil {
-			t.Fatal("failed to write to test file:", err)
-		}
-		if err := f.Close(); err != nil {
-			t.Fatal("failed to close the test file:", err)
-		}
-	}
-
-	return tDir
 }

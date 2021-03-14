@@ -1,7 +1,5 @@
 package packager
 
-import "io"
-
 const IGNORE_FILE = "./lambdaignore"
 
 // Archiver creates an archive at path with target directory contents.
@@ -27,11 +25,6 @@ type DirLister interface {
 // Excluder knows how to exclude paths.
 type Excluder interface {
 	Exclude(path string) bool
-}
-
-// FileCopier writes a file at srcPath to dest.
-type FileCopier interface {
-	Copy(srcPath string, dest io.Writer) error
 }
 
 // FileReader reads file contents as byte slice.

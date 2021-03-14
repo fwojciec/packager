@@ -10,27 +10,26 @@ import (
 )
 
 type archiver struct {
-	dirLister packager.DirLister
+	dl packager.DirLister
 }
 
 func (a *archiver) Archive(project packager.Locator, dest string) error {
-	root := project.Location()
-	projFiles, err := a.dirLister.ListDir(root)
+	src := project.Location()
+
+	projFiles, err := a.dl.ListDir(src)
 	if err != nil {
 		return err
 	}
 
-	absDest, err := filepath.Abs(dest)
+	f, err := os.Create(dest)
 	if err != nil {
 		return err
 	}
-
-	f, err := os.Create(absDest)
 	defer f.Close()
 
 	w := zip.NewWriter(f)
 	for _, file := range projFiles {
-		relPath, err := filepath.Rel(root, file)
+		relPath, err := filepath.Rel(src, file)
 		if err != nil {
 			return err
 		}
@@ -38,23 +37,30 @@ func (a *archiver) Archive(project packager.Locator, dest string) error {
 		if err != nil {
 			return err
 		}
-		sf, err := os.Open(file)
-		if err != nil {
-			return err
-		}
-		defer sf.Close()
-
-		_, err = io.Copy(zf, sf)
-		if err != nil {
+		if err := copyFile(file, zf); err != nil {
 			return err
 		}
 	}
 
-	return w.Close()
+	if err := w.Close(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func New(dirLister packager.DirLister) packager.Archiver {
-	return &archiver{
-		dirLister: dirLister,
+func copyFile(srcPath string, dest io.Writer) error {
+	src, err := os.Open(srcPath)
+	if err != nil {
+		return err
 	}
+	defer src.Close()
+	if _, err := io.Copy(dest, src); err != nil {
+		return err
+	}
+	return nil
+}
+
+func New(dl packager.DirLister) packager.Archiver {
+	return &archiver{dl}
 }
