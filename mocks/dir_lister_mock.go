@@ -18,7 +18,7 @@ var _ packager.DirLister = &DirListerMock{}
 //
 // 		// make and configure a mocked packager.DirLister
 // 		mockedDirLister := &DirListerMock{
-// 			ListDirFunc: func(target string) ([]string, error) {
+// 			ListDirFunc: func(target string, excl packager.Excluder) ([]string, error) {
 // 				panic("mock out the ListDir method")
 // 			},
 // 		}
@@ -29,7 +29,7 @@ var _ packager.DirLister = &DirListerMock{}
 // 	}
 type DirListerMock struct {
 	// ListDirFunc mocks the ListDir method.
-	ListDirFunc func(target string) ([]string, error)
+	ListDirFunc func(target string, excl packager.Excluder) ([]string, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -37,25 +37,29 @@ type DirListerMock struct {
 		ListDir []struct {
 			// Target is the target argument value.
 			Target string
+			// Excl is the excl argument value.
+			Excl packager.Excluder
 		}
 	}
 	lockListDir sync.RWMutex
 }
 
 // ListDir calls ListDirFunc.
-func (mock *DirListerMock) ListDir(target string) ([]string, error) {
+func (mock *DirListerMock) ListDir(target string, excl packager.Excluder) ([]string, error) {
 	if mock.ListDirFunc == nil {
 		panic("DirListerMock.ListDirFunc: method is nil but DirLister.ListDir was just called")
 	}
 	callInfo := struct {
 		Target string
+		Excl   packager.Excluder
 	}{
 		Target: target,
+		Excl:   excl,
 	}
 	mock.lockListDir.Lock()
 	mock.calls.ListDir = append(mock.calls.ListDir, callInfo)
 	mock.lockListDir.Unlock()
-	return mock.ListDirFunc(target)
+	return mock.ListDirFunc(target, excl)
 }
 
 // ListDirCalls gets all the calls that were made to ListDir.
@@ -63,9 +67,11 @@ func (mock *DirListerMock) ListDir(target string) ([]string, error) {
 //     len(mockedDirLister.ListDirCalls())
 func (mock *DirListerMock) ListDirCalls() []struct {
 	Target string
+	Excl   packager.Excluder
 } {
 	var calls []struct {
 		Target string
+		Excl   packager.Excluder
 	}
 	mock.lockListDir.RLock()
 	calls = mock.calls.ListDir

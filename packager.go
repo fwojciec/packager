@@ -19,7 +19,7 @@ type BuilderFactory interface {
 
 // DirLister returns a list of all files in a directory.
 type DirLister interface {
-	ListDir(target string) ([]string, error)
+	ListDir(target string, excl Excluder) ([]string, error)
 }
 
 // Excluder knows how to exclude paths.
