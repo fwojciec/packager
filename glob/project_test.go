@@ -18,7 +18,7 @@ func TestProjectReturnsItsAbsoluteLocation(t *testing.T) {
 
 	result := subject.Location()
 
-	expected, _ := filepath.Abs("/root")
+	expected := filepath.Clean("/root")
 	equals(t, expected, result)
 }
 
