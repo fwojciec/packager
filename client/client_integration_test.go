@@ -88,7 +88,7 @@ func TestHashesAPythonProject(t *testing.T) {
 
 	subject := client.New()
 
-	err, res := subject.Hash(root, packager.LanguagePython)
+	res, err := subject.Hash(packager.LanguagePython, root)
 	ok(t, err)
 
 	equals(t, "9847721f4b50a480344bb1ac4ced4ffd", res)

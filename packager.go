@@ -32,6 +32,11 @@ type FileReader interface {
 	ReadFile(path string) ([]byte, error)
 }
 
+// Hasher hashes a project.
+type Hasher interface {
+	Hash(project LocatorExcluder) (string, error)
+}
+
 // Isolator creates a temporary copy of the project to enable safe and clean
 // build.  Close removes the isolated copy.
 type Isolator interface {
