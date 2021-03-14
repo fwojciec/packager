@@ -5,7 +5,6 @@ package copy_test
 import (
 	"os"
 	"path"
-	"path/filepath"
 	"strings"
 	"testing"
 
@@ -76,33 +75,4 @@ func TestIsolatorExcludesExcludedFiles(t *testing.T) {
 	// excluded file should not exist
 	_, err = os.Stat(path.Join(res.Location(), testExcludedFileName))
 	assert(t, os.IsNotExist(err), "excluded file should not exist")
-}
-
-func createFilesInTemporaryDirectory(t *testing.T, config map[string][]byte) string {
-	tDir, err := os.MkdirTemp("", "")
-	if err != nil {
-		t.Fatal("failed to create temporary directory:", err)
-	}
-
-	for p, c := range config {
-		dir, file := filepath.Split(p)
-		if dir != "" {
-			if err := os.MkdirAll(path.Join(tDir, dir), os.ModePerm); err != nil {
-				t.Fatal("failed to create directory:", err)
-			}
-		}
-		f, err := os.Create(path.Join(tDir, dir, file))
-		if err != nil {
-			t.Fatal("failed to create test file:", err)
-		}
-		_, err = f.Write(c)
-		if err != nil {
-			t.Fatal("failed to write to test file:", err)
-		}
-		if err := f.Close(); err != nil {
-			t.Fatal("failed to close the test file:", err)
-		}
-	}
-
-	return tDir
 }
