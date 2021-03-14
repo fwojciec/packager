@@ -1,6 +1,6 @@
 package packager
 
-const IGNORE_FILE = "./lambdaignore"
+const IGNORE_FILE = ".lambdaignore"
 
 // Archiver creates an archive at path with target directory contents.
 type Archiver interface {
@@ -19,12 +19,12 @@ type BuilderFactory interface {
 
 // DirLister returns a list of all files in a directory.
 type DirLister interface {
-	ListDir(target string, excl Excluder) ([]string, error)
+	ListDir(target string, exclFn func(path string) (bool, error)) ([]string, error)
 }
 
 // Excluder knows how to exclude paths.
 type Excluder interface {
-	Exclude(path string) bool
+	Exclude(path string) (bool, error)
 }
 
 // FileReader reads file contents as byte slice.

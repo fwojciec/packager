@@ -9,14 +9,6 @@ import (
 	"github.com/fwojciec/packager"
 )
 
-type exclFunc func(path string) bool
-
-func (f exclFunc) Exclude(path string) bool {
-	return f(path)
-}
-
-func noopExclude(path string) bool { return false }
-
 type archiver struct {
 	dl packager.DirLister
 }
@@ -24,7 +16,8 @@ type archiver struct {
 func (a *archiver) Archive(project packager.Locator, dest string) error {
 	src := project.Location()
 
-	projFiles, err := a.dl.ListDir(src, exclFunc(noopExclude))
+	noopExclFn := func(path string) (bool, error) { return false, nil }
+	projFiles, err := a.dl.ListDir(src, noopExclFn)
 	if err != nil {
 		return err
 	}

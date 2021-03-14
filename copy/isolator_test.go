@@ -25,7 +25,7 @@ func TestIsolatorCreatesAnIsolatedProject(t *testing.T) {
 
 	mockProject := &mocks.LocatorExcluderMock{
 		LocationFunc: func() string { return srcDir },
-		ExcludeFunc:  func(path string) bool { return false },
+		ExcludeFunc:  func(path string) (bool, error) { return false, nil },
 	}
 
 	subject := copy.NewIsolator()
@@ -54,11 +54,11 @@ func TestIsolatorExcludesExcludedFiles(t *testing.T) {
 
 	mockProject := &mocks.LocatorExcluderMock{
 		LocationFunc: func() string { return srcDir },
-		ExcludeFunc: func(path string) bool {
+		ExcludeFunc: func(path string) (bool, error) {
 			if strings.HasSuffix(path, testExcludedFileName) {
-				return true
+				return true, nil
 			}
-			return false
+			return false, nil
 		},
 	}
 

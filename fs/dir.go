@@ -7,14 +7,14 @@ import (
 	"github.com/fwojciec/packager"
 )
 
-type dirListFunc func(target string, excl packager.Excluder) ([]string, error)
+type dirListFunc func(target string, exclFn func(path string) (bool, error)) ([]string, error)
 
-func (f dirListFunc) ListDir(target string, excl packager.Excluder) ([]string, error) {
-	return f(target, excl)
+func (f dirListFunc) ListDir(target string, exclFn func(path string) (bool, error)) ([]string, error) {
+	return f(target, exclFn)
 }
 
 func NewDirLister() packager.DirLister {
-	return dirListFunc(func(target string, excl packager.Excluder) ([]string, error) {
+	return dirListFunc(func(target string, exclFn func(path string) (bool, error)) ([]string, error) {
 		res := make([]string, 0)
 		err := filepath.WalkDir(target, func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
@@ -23,7 +23,11 @@ func NewDirLister() packager.DirLister {
 			if d.IsDir() {
 				return nil
 			}
-			if excl.Exclude(path) {
+			excluded, err := exclFn(path)
+			if err != nil {
+				return err
+			}
+			if excluded {
 				return nil
 			}
 			res = append(res, path)

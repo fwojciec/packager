@@ -57,11 +57,13 @@ func (p *Packager) Hash(lang packager.Language, target string) (string, error) {
 }
 
 func New() *Packager {
-	projectFactory := glob.NewProjectFactory(fs.NewFileReader())
+	dirLister := fs.NewDirLister()
+	fileReader := fs.NewFileReader()
+	projectFactory := glob.NewProjectFactory(fileReader)
 	isolator := copy.NewIsolator()
 	builderFactory := builder.NewBuilderFactory()
-	archiver := zip.New(fs.NewDirLister())
-	hasher := md5.New()
+	archiver := zip.New(dirLister)
+	hasher := md5.New(dirLister, fileReader)
 
 	return &Packager{
 		ProjectFactory: projectFactory,

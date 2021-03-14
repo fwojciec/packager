@@ -21,7 +21,7 @@ type project struct {
 func NewProject(root string, lang packager.Language, fr packager.FileReader) (packager.LocatorExcluder, error) {
 	absRoot, err := filepath.Abs(root)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 	p := &project{
 		fr:    fr,
@@ -43,13 +43,17 @@ func NewProject(root string, lang packager.Language, fr packager.FileReader) (pa
 	return p, nil
 }
 
-func (p *project) Exclude(path string) bool {
+func (p *project) Exclude(path string) (bool, error) {
 	for _, g := range p.globs {
-		if g.Match(path) {
-			return true
+		relPath, err := filepath.Rel(p.root, path)
+		if err != nil {
+			return false, err
+		}
+		if g.Match(relPath) {
+			return true, nil
 		}
 	}
-	return false
+	return false, nil
 }
 
 func (p *project) Location() string {

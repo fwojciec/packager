@@ -78,7 +78,7 @@ func TestHashesAPythonProject(t *testing.T) {
 		{filepath.Clean(".lambdaignore"), []byte("*_test.py\n")},
 		{filepath.Clean("main.py"), []byte("print(\"hello world\")\n")},
 		{filepath.Clean("main_test.py"), []byte("")},
-		{filepath.Clean("requirements.txt"), []byte("certifi==2020.12.5\nchardet==4.0.0\nidna==2.10\nurllib3==1.26.3\nrequests==2.25.1)\n")},
+		{filepath.Clean("requirements.txt"), []byte("certifi==2020.12.5\nchardet==4.0.0\nidna==2.10\nurllib3==1.26.3\nrequests==2.25.1\n")},
 		{filepath.Clean("subpackage/__init__.py"), []byte("")},
 		{filepath.Clean("subpackage/subpackage.py"), []byte("# just a comment\n")},
 	}

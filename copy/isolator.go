@@ -27,7 +27,7 @@ func isolate(project packager.LocatorExcluder) (packager.LocatorRemover, error) 
 	}
 	options := copy.Options{
 		Skip: func(src string) (bool, error) {
-			return project.Exclude(src), nil
+			return project.Exclude(src)
 		},
 	}
 	if err := copy.Copy(project.Location(), tmpDir, options); err != nil {
