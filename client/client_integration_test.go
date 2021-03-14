@@ -9,8 +9,10 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"testing"
 
+	"github.com/fwojciec/packager"
 	"github.com/fwojciec/packager/client"
 )
 
@@ -69,23 +71,25 @@ func TestPackagesAPythonProjectWithNoDependencies(t *testing.T) {
 	equals(t, []string{testContents}, foundContents)
 }
 
-// func TestHashesAProject(t *testing.T) {
-// 	t.Parallel()
+func TestHashesAPythonProject(t *testing.T) {
+	t.Parallel()
 
-// 	testFiles := []testFile{
-// 		{filepath.Clean(".lambdaignore"), []byte("*_test.py\n")},
-// 		{filepath.Clean("main.py"), []byte("print(\"hello world\")\n")},
-// 		{filepath.Clean("main_test.py"), []byte("")},
-// 		{filepath.Clean("requirements.txt"), []byte("certifi==2020.12.5\nchardet==4.0.0\nidna==2.10\nurllib3==1.26.3\nrequests==2.25.1)\n")},
-// 		{filepath.Clean("subpackage/__init__.py"), []byte("")},
-// 		{filepath.Clean("subpackage/subpackage.py"), []byte("# just a comment\n")},
-// 	}
+	testFiles := []testFile{
+		{filepath.Clean(".lambdaignore"), []byte("*_test.py\n")},
+		{filepath.Clean("main.py"), []byte("print(\"hello world\")\n")},
+		{filepath.Clean("main_test.py"), []byte("")},
+		{filepath.Clean("requirements.txt"), []byte("certifi==2020.12.5\nchardet==4.0.0\nidna==2.10\nurllib3==1.26.3\nrequests==2.25.1)\n")},
+		{filepath.Clean("subpackage/__init__.py"), []byte("")},
+		{filepath.Clean("subpackage/subpackage.py"), []byte("# just a comment\n")},
+	}
 
-// 	root := createFilesInTemporaryDirectory(t, testFiles)
-// 	t.Cleanup(func() { os.RemoveAll(root) })
+	root := createFilesInTemporaryDirectory(t, testFiles)
+	t.Cleanup(func() { os.RemoveAll(root) })
 
-// 	subject := client.New()
+	subject := client.New()
 
-// 	err, res := subject.Hash(root)
+	err, res := subject.Hash(root, packager.LanguagePython)
+	ok(t, err)
 
-// }
+	equals(t, "9847721f4b50a480344bb1ac4ced4ffd", res)
+}
