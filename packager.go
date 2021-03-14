@@ -57,7 +57,7 @@ type LocatorExcluder interface {
 
 // ProjectFactory creates project instances.
 type ProjectFactory interface {
-	New(root string) (LocatorExcluder, error)
+	New(root string, lang Language) (LocatorExcluder, error)
 }
 
 // Remover knows how to remove itself.

@@ -19,7 +19,7 @@ type Packager struct {
 }
 
 func (p *Packager) Package(lang packager.Language, target, destination string) error {
-	project, err := p.ProjectFactory.New(target)
+	project, err := p.ProjectFactory.New(target, lang)
 	if err != nil {
 		return fmt.Errorf("%w: error initializing project: %s", packager.ProjectError, err)
 	}

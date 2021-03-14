@@ -15,9 +15,10 @@ type project struct {
 	fr    packager.FileReader
 	globs map[string]glob.Glob
 	root  string
+	lang  packager.Language
 }
 
-func NewProject(root string, fr packager.FileReader) (packager.LocatorExcluder, error) {
+func NewProject(root string, lang packager.Language, fr packager.FileReader) (packager.LocatorExcluder, error) {
 	absRoot, err := filepath.Abs(root)
 	if err != nil {
 		return nil, nil

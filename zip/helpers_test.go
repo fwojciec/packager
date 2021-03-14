@@ -13,23 +13,6 @@ import (
 	"testing"
 )
 
-type testWriteCloser struct {
-	buf *bytes.Buffer
-}
-
-func (wc *testWriteCloser) Write(p []byte) (int, error) {
-	return wc.buf.Write(p)
-}
-
-func (wc *testWriteCloser) Close() error {
-	return nil
-}
-
-func newWriteCloser() io.WriteCloser {
-	var buf bytes.Buffer
-	return &testWriteCloser{&buf}
-}
-
 type testFile struct {
 	name     string
 	contents []byte

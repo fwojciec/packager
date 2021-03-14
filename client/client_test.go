@@ -14,7 +14,7 @@ func TestClientPackagesPythonProjects(t *testing.T) {
 	mockProject := &mocks.LocatorExcluderMock{}
 
 	mockProjectFactory := &mocks.ProjectFactoryMock{
-		NewFunc: func(root string) (packager.LocatorExcluder, error) { return mockProject, nil },
+		NewFunc: func(root string, lang packager.Language) (packager.LocatorExcluder, error) { return mockProject, nil },
 	}
 
 	mockTempProject := &mocks.LocatorRemoverMock{
@@ -51,6 +51,7 @@ func TestClientPackagesPythonProjects(t *testing.T) {
 	ok(t, err)
 	equals(t, 1, len(mockProjectFactory.NewCalls()))
 	equals(t, "./project_dir", mockProjectFactory.NewCalls()[0].Root)
+	equals(t, packager.LanguagePython, mockProjectFactory.NewCalls()[0].Lang)
 	equals(t, 1, len(mockIsolator.IsolateCalls()))
 	equals(t, mockProject, mockIsolator.IsolateCalls()[0].Project)
 	equals(t, 1, len(mockBuilderFactory.NewCalls()))

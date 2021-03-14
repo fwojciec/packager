@@ -14,7 +14,7 @@ func TestProjectReturnsItsAbsoluteLocation(t *testing.T) {
 	mockFileReader := &mocks.FileReaderMock{
 		ReadFileFunc: func(path string) ([]byte, error) { return nil, nil },
 	}
-	subject, err := glob.NewProject("./root", mockFileReader)
+	subject, err := glob.NewProject("./root", "", mockFileReader)
 	ok(t, err)
 
 	result := subject.Location()
@@ -28,7 +28,7 @@ func TestProjectDoesntExcludeProjectFiles(t *testing.T) {
 	mockFileReader := &mocks.FileReaderMock{
 		ReadFileFunc: func(path string) ([]byte, error) { return nil, nil },
 	}
-	subject, err := glob.NewProject("./root", mockFileReader)
+	subject, err := glob.NewProject("./root", "", mockFileReader)
 	ok(t, err)
 
 	result := subject.Exclude("handler.py")
@@ -41,7 +41,7 @@ func TestProjectExcludesIgnoreFile(t *testing.T) {
 	mockFileReader := &mocks.FileReaderMock{
 		ReadFileFunc: func(path string) ([]byte, error) { return nil, nil },
 	}
-	subject, err := glob.NewProject("", mockFileReader)
+	subject, err := glob.NewProject("", "", mockFileReader)
 	ok(t, err)
 
 	result := subject.Exclude(packager.IGNORE_FILE)
@@ -54,7 +54,7 @@ func TestProjectExcludesIgnoreFileGlobMatches(t *testing.T) {
 	mockFileReader := &mocks.FileReaderMock{
 		ReadFileFunc: func(path string) ([]byte, error) { return []byte("*_test.py"), nil },
 	}
-	subject, err := glob.NewProject("", mockFileReader)
+	subject, err := glob.NewProject("", "", mockFileReader)
 	ok(t, err)
 
 	result := subject.Exclude("handler_test.py")
