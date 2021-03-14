@@ -19,13 +19,9 @@ type project struct {
 }
 
 func NewProject(root string, lang packager.Language, fr packager.FileReader) (packager.LocatorExcluder, error) {
-	absRoot, err := filepath.Abs(root)
-	if err != nil {
-		return nil, err
-	}
 	p := &project{
 		fr:    fr,
-		root:  absRoot,
+		root:  filepath.Clean(root),
 		globs: make(map[string]glob.Glob),
 	}
 	if err := p.addGlob(packager.IGNORE_FILE); err != nil {
