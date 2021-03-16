@@ -8,7 +8,7 @@
 - creates isolated builds (i.e. doesn't touch/modify original repositories)
 - respects a `.lambdaignore` file in the root of a repository, if present (works similar to `.gitignore`)
 - installs dependencies/builds
-- supports Python packages
+- support for Python repositories
 - ability to generate a unique hash for a source directory (for Terraform to be able to determine whether the project has changed since the previous deployment)
 
 ## Planned features

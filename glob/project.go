@@ -3,6 +3,7 @@ package glob
 import (
 	"bufio"
 	"bytes"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -15,7 +16,6 @@ type project struct {
 	fr    packager.FileReader
 	globs map[string]glob.Glob
 	root  string
-	lang  packager.Language
 }
 
 func NewProject(root string, lang packager.Language, fr packager.FileReader) (packager.LocatorExcluder, error) {
@@ -24,17 +24,14 @@ func NewProject(root string, lang packager.Language, fr packager.FileReader) (pa
 		root:  filepath.Clean(root),
 		globs: make(map[string]glob.Glob),
 	}
-	if err := p.addGlob(packager.IGNORE_FILE); err != nil {
+	if err := p.addIgnoreFileGlobs(); err != nil {
 		return nil, err
 	}
-	patterns, err := p.readIgnoreFile()
-	if err != nil {
+	if err := p.addUniversalGlobs(); err != nil {
 		return nil, err
 	}
-	for _, pattern := range patterns {
-		if err := p.addGlob(pattern); err != nil {
-			return nil, err
-		}
+	if err := p.addLanguageSpecificGlobs(lang); err != nil {
+		return nil, err
 	}
 	return p, nil
 }
@@ -56,31 +53,61 @@ func (p *project) Location() string {
 	return p.root
 }
 
-func (p *project) addGlob(pattern string) error {
-	if _, ok := p.globs[pattern]; ok {
-		return nil
+func (p *project) addGlobs(patterns []string) error {
+	for _, pattern := range patterns {
+		if _, ok := p.globs[pattern]; ok {
+			return nil
+		}
+		g, err := glob.Compile(pattern)
+		if err != nil {
+			return err
+		}
+		p.globs[pattern] = g
 	}
-	g, err := glob.Compile(pattern)
-	if err != nil {
-		return err
-	}
-	p.globs[pattern] = g
 	return nil
 }
 
-func (p *project) readIgnoreFile() ([]string, error) {
+func (p *project) addIgnoreFileGlobs() error {
 	b, err := p.fr.ReadFile(path.Join(p.root, packager.IGNORE_FILE))
 	if err != nil {
-		// ignore error, since ignoreFile is not required
-		return nil, nil
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
 	}
-	res := make([]string, 0)
+	patterns := make([]string, 0)
 	scanner := bufio.NewScanner(bytes.NewBuffer(b))
 	for scanner.Scan() {
-		res = append(res, strings.TrimSpace(scanner.Text()))
+		patterns = append(patterns, strings.TrimSpace(scanner.Text()))
 	}
 	if err := scanner.Err(); err != nil {
-		return nil, err
+		return err
 	}
-	return res, nil
+	if err := p.addGlobs(patterns); err != nil {
+		return err
+	}
+	return nil
+}
+
+var DEFAULT_UNIVERSAL_GLOBS = []string{
+	packager.IGNORE_FILE,
+	".DS_Store",
+}
+
+func (p *project) addUniversalGlobs() error {
+	return p.addGlobs(DEFAULT_UNIVERSAL_GLOBS)
+}
+
+var DEFAULT_PYTHON_GLOBS = []string{
+	"__pycache__/",
+	"*.py[cod]",
+	".pytest_cache/",
+}
+
+func (p *project) addLanguageSpecificGlobs(lang packager.Language) error {
+	switch lang {
+	case packager.LanguagePython:
+		return p.addGlobs(DEFAULT_PYTHON_GLOBS)
+	}
+	return nil
 }
